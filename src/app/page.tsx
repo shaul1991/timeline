@@ -54,6 +54,22 @@ export default function Home() {
     setShowForm(true);
   };
 
+  const handleSubtaskToggle = (taskId: string, subtaskId: string) => {
+    setTasks(tasks.map(task => {
+      if (task.id === taskId && task.subtasks) {
+        return {
+          ...task,
+          subtasks: task.subtasks.map(subtask =>
+            subtask.id === subtaskId
+              ? { ...subtask, completed: !subtask.completed }
+              : subtask
+          )
+        };
+      }
+      return task;
+    }));
+  };
+
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingTask(null);
@@ -135,6 +151,7 @@ export default function Home() {
             onToggle={handleToggleTask}
             onDelete={handleDeleteTask}
             onEdit={handleEditTask}
+            onSubtaskToggle={handleSubtaskToggle}
           />
         </div>
 

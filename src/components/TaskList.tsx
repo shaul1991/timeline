@@ -8,9 +8,10 @@ interface TaskListProps {
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (task: Task) => void;
+  onSubtaskToggle: (taskId: string, subtaskId: string) => void;
 }
 
-export default function TaskList({ tasks, onToggle, onDelete, onEdit }: TaskListProps) {
+export default function TaskList({ tasks, onToggle, onDelete, onEdit, onSubtaskToggle }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -37,6 +38,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit }: TaskList
                 onToggle={onToggle}
                 onDelete={onDelete}
                 onEdit={onEdit}
+                onSubtaskToggle={onSubtaskToggle}
               />
             ))}
           </div>
@@ -56,6 +58,7 @@ export default function TaskList({ tasks, onToggle, onDelete, onEdit }: TaskList
                 onToggle={onToggle}
                 onDelete={onDelete}
                 onEdit={onEdit}
+                onSubtaskToggle={onSubtaskToggle}
               />
             ))}
           </div>

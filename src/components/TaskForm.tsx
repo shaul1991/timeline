@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Task, TaskFrequency } from '@/types/task';
+import { Task, TaskFrequency, Subtask } from '@/types/task';
 
 interface TaskFormProps {
   onSubmit: (task: Omit<Task, 'id' | 'createdAt'>) => void;
@@ -15,6 +15,8 @@ export default function TaskForm({ onSubmit, onCancel, editingTask, defaultFrequ
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState<TaskFrequency>(defaultFrequency || 'once');
   const [dueDate, setDueDate] = useState('');
+  const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
   useEffect(() => {
     if (editingTask) {
@@ -22,8 +24,26 @@ export default function TaskForm({ onSubmit, onCancel, editingTask, defaultFrequ
       setDescription(editingTask.description || '');
       setFrequency(editingTask.frequency);
       setDueDate(editingTask.dueDate || '');
+      setSubtasks(editingTask.subtasks || []);
     }
   }, [editingTask]);
+
+  const handleAddSubtask = () => {
+    if (!newSubtaskTitle.trim()) return;
+
+    const newSubtask: Subtask = {
+      id: Date.now().toString(),
+      title: newSubtaskTitle.trim(),
+      completed: false,
+    };
+
+    setSubtasks([...subtasks, newSubtask]);
+    setNewSubtaskTitle('');
+  };
+
+  const handleRemoveSubtask = (subtaskId: string) => {
+    setSubtasks(subtasks.filter(st => st.id !== subtaskId));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +56,14 @@ export default function TaskForm({ onSubmit, onCancel, editingTask, defaultFrequ
       completed: editingTask?.completed || false,
       dueDate: dueDate || undefined,
       completedAt: editingTask?.completedAt,
+      subtasks: subtasks.length > 0 ? subtasks : undefined,
     });
 
     setTitle('');
     setDescription('');
     setFrequency(defaultFrequency || 'once');
     setDueDate('');
+    setSubtasks([]);
   };
 
   return (
@@ -108,6 +130,48 @@ export default function TaskForm({ onSubmit, onCancel, editingTask, defaultFrequ
             onChange={(e) => setDueDate(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            하위 작업 (선택사항)
+          </label>
+          <div className="space-y-2">
+            {subtasks.map((subtask) => (
+              <div key={subtask.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
+                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{subtask.title}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSubtask(subtask.id)}
+                  className="text-red-600 hover:text-red-700 text-sm"
+                >
+                  삭제
+                </button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddSubtask();
+                  }
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                placeholder="하위 작업 추가 (예: 변기 청소, 세면대 청소)"
+              />
+              <button
+                type="button"
+                onClick={handleAddSubtask}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm transition-colors"
+              >
+                추가
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-3 pt-2">
